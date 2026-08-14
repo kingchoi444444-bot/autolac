@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 const TYPE_LABEL: Record<string, string> = {
   FREE: "자유게시판",
   CAR_MODEL: "차종별 게시판",
