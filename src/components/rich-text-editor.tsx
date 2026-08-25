@@ -20,6 +20,15 @@ const FONT_SIZES = [
 
 const COLORS = ["#000000", "#e11d48", "#2563eb", "#16a34a", "#ca8a04"];
 
+async function uploadImageFile(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch("/api/upload", { method: "POST", body: formData });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? "업로드에 실패했습니다.");
+  return data.url as string;
+}
+
 const btnClass =
   "rounded px-2 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/10 data-[active=true]:bg-black/10 dark:data-[active=true]:bg-white/20";
 
@@ -61,12 +70,8 @@ function Toolbar({ editor }: { editor: Editor }) {
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "업로드에 실패했습니다.");
-      editor.chain().focus().setImage({ src: data.url }).run();
+      const url = await uploadImageFile(file);
+      editor.chain().focus().setImage({ src: url }).run();
     } catch (err) {
       alert(err instanceof Error ? err.message : "업로드에 실패했습니다.");
     } finally {
@@ -223,6 +228,24 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class: "prose prose-sm dark:prose-invert max-w-none min-h-[240px] px-3 py-2 focus:outline-none",
+      },
+      handlePaste: (view, event) => {
+        const item = Array.from(event.clipboardData?.items ?? []).find((i) =>
+          i.type.startsWith("image/"),
+        );
+        const file = item?.getAsFile();
+        if (!file) return false;
+
+        event.preventDefault();
+        uploadImageFile(file)
+          .then((url) => {
+            const node = view.state.schema.nodes.image.create({ src: url });
+            view.dispatch(view.state.tr.replaceSelectionWith(node));
+          })
+          .catch((err) => {
+            alert(err instanceof Error ? err.message : "이미지 업로드에 실패했습니다.");
+          });
+        return true;
       },
     },
     onUpdate: ({ editor }) => setHtml(editor.getHTML()),
