@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { deleteNews } from "../actions";
 
 type PageProps = {
@@ -52,9 +53,10 @@ export default async function NewsDetailPage({ params }: PageProps) {
         )}
       </dl>
 
-      <div className="mb-6 whitespace-pre-wrap border-y border-black/10 py-6 dark:border-white/10">
-        {news.summary}
-      </div>
+      <div
+        className="prose prose-sm dark:prose-invert mb-6 max-w-none border-y border-black/10 py-6 dark:border-white/10"
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(news.summary) }}
+      />
 
       {isAdmin && (
         <div className="flex gap-3">

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 async function requireUserId() {
   const session = await auth();
@@ -18,7 +19,7 @@ export async function createPost(boardSlug: string, formData: FormData) {
   const userId = await requireUserId();
 
   const title = String(formData.get("title") ?? "").trim();
-  const content = String(formData.get("content") ?? "").trim();
+  const content = sanitizeHtml(String(formData.get("content") ?? "").trim());
   if (!title || !content) {
     throw new Error("제목과 내용을 모두 입력해주세요.");
   }
@@ -43,7 +44,7 @@ export async function updatePost(boardSlug: string, postId: string, formData: Fo
   }
 
   const title = String(formData.get("title") ?? "").trim();
-  const content = String(formData.get("content") ?? "").trim();
+  const content = sanitizeHtml(String(formData.get("content") ?? "").trim());
   if (!title || !content) {
     throw new Error("제목과 내용을 모두 입력해주세요.");
   }

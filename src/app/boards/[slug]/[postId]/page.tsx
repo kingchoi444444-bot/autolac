@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { sanitizeHtml } from "@/lib/sanitize";
 import {
   createComment,
   deleteComment,
@@ -58,9 +59,10 @@ export default async function PostDetailPage({ params }: PageProps) {
         {post.viewCount + 1}
       </p>
 
-      <div className="mb-6 whitespace-pre-wrap border-b border-black/10 pb-6 dark:border-white/10">
-        {post.content}
-      </div>
+      <div
+        className="prose prose-sm dark:prose-invert mb-6 max-w-none border-b border-black/10 pb-6 dark:border-white/10"
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
+      />
 
       <div className="mb-6 flex items-center gap-3">
         {userId ? (

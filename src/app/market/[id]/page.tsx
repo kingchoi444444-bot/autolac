@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { CATEGORY_LABEL, STATUS_LABEL } from "@/lib/listing-labels";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { deleteListing, updateListingStatus } from "../actions";
 
 type PageProps = {
@@ -76,9 +77,10 @@ export default async function ListingDetailPage({ params }: PageProps) {
         )}
       </dl>
 
-      <div className="mb-6 whitespace-pre-wrap border-y border-black/10 py-6 dark:border-white/10">
-        {listing.description}
-      </div>
+      <div
+        className="prose prose-sm dark:prose-invert mb-6 max-w-none border-y border-black/10 py-6 dark:border-white/10"
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(listing.description) }}
+      />
 
       <div className="mb-6 rounded border border-black/10 p-4 text-sm dark:border-white/10">
         <p className="font-medium">판매자: {listing.seller.name}</p>

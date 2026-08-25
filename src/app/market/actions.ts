@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 async function requireUserId() {
   const session = await auth();
@@ -16,7 +17,7 @@ async function requireUserId() {
 
 function parseListingForm(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
-  const description = String(formData.get("description") ?? "").trim();
+  const description = sanitizeHtml(String(formData.get("description") ?? "").trim());
   const category = String(formData.get("category") ?? "");
   const price = Number(formData.get("price"));
   const location = String(formData.get("location") ?? "").trim() || null;

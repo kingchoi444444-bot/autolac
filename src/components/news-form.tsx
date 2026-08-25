@@ -1,5 +1,13 @@
 "use client";
 
+import { RichTextEditor } from "./rich-text-editor";
+
+const NEWS_RULES = [
+  "공식 발표되지 않은 추측성 정보는 '루머'임을 명시해주세요.",
+  "제조사/언론사 저작물(사진·기사 원문)을 무단으로 게재하지 마세요.",
+  "가격/스펙은 확인된 최신 정보를 기준으로 작성해주세요.",
+];
+
 type NewsFormProps = {
   action: (formData: FormData) => void;
   submitLabel: string;
@@ -51,13 +59,12 @@ export function NewsForm({ action, submitLabel, defaultValues }: NewsFormProps) 
         className={inputClass}
       />
 
-      <textarea
+      <RichTextEditor
         name="summary"
-        placeholder="소개/스펙 요약"
         defaultValue={defaultValues?.summary}
-        required
-        rows={8}
-        className={inputClass}
+        placeholder="소개/스펙 요약을 입력하세요"
+        rulesTitle="신차정보 작성 규칙"
+        rules={NEWS_RULES}
       />
 
       <div className="grid grid-cols-2 gap-4">

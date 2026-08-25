@@ -1,5 +1,14 @@
 "use client";
 
+import { RichTextEditor } from "./rich-text-editor";
+
+const LISTING_RULES = [
+  "실제 차량/부품 상태와 다른 허위 매물은 등록하지 마세요.",
+  "타인의 사진을 무단으로 도용하지 마세요.",
+  "연락처(전화번호 등) 개인정보는 신중하게 공개해주세요.",
+  "판매 완료 시 상태를 '판매완료'로 변경해주세요.",
+];
+
 type ListingFormProps = {
   action: (formData: FormData) => void;
   submitLabel: string;
@@ -41,13 +50,12 @@ export function ListingForm({ action, submitLabel, defaultValues }: ListingFormP
         className={inputClass}
       />
 
-      <textarea
+      <RichTextEditor
         name="description"
-        placeholder="상세 설명"
         defaultValue={defaultValues?.description}
-        required
-        rows={8}
-        className={inputClass}
+        placeholder="상세 설명을 입력하세요"
+        rulesTitle="매물 등록 규칙"
+        rules={LISTING_RULES}
       />
 
       <div className="grid grid-cols-2 gap-4">

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 async function requireAdmin() {
   const session = await auth();
@@ -18,7 +19,7 @@ function parseNewsForm(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   const brand = String(formData.get("brand") ?? "").trim();
   const model = String(formData.get("model") ?? "").trim();
-  const summary = String(formData.get("summary") ?? "").trim();
+  const summary = sanitizeHtml(String(formData.get("summary") ?? "").trim());
   const price = String(formData.get("price") ?? "").trim() || null;
   const imageUrl = String(formData.get("imageUrl") ?? "").trim() || null;
   const releaseDateRaw = String(formData.get("releaseDate") ?? "").trim();
