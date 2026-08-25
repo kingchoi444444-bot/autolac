@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Underline } from "@tiptap/extension-underline";
@@ -51,8 +51,38 @@ function ToolbarButton({ active, onClick, children, title }: ToolbarButtonProps)
 }
 
 function Toolbar({ editor }: { editor: Editor }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "업로드에 실패했습니다.");
+      editor.chain().focus().setImage({ src: data.url }).run();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "업로드에 실패했습니다.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="flex flex-wrap items-center gap-1 border-b border-black/10 p-2 dark:border-white/10">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/gif,image/webp"
+        className="hidden"
+        onChange={handleFileChange}
+      />
       <select
         onMouseDown={preventFocusLoss}
         onChange={(e) => editor.chain().focus().setFontSize(e.target.value).run()}
@@ -145,13 +175,8 @@ function Toolbar({ editor }: { editor: Editor }) {
         링크
       </ToolbarButton>
       <ToolbarButton onClick={() => editor.chain().focus().unsetLink().run()}>링크제거</ToolbarButton>
-      <ToolbarButton
-        onClick={() => {
-          const url = window.prompt("이미지 URL을 입력하세요");
-          if (url) editor.chain().focus().setImage({ src: url }).run();
-        }}
-      >
-        이미지
+      <ToolbarButton onClick={() => fileInputRef.current?.click()}>
+        {uploading ? "업로드 중…" : "이미지"}
       </ToolbarButton>
       <ToolbarButton onClick={() => editor.chain().focus().setHorizontalRule().run()}>구분선</ToolbarButton>
 
